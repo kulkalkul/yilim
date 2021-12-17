@@ -18,17 +18,30 @@ use crate::command::CommandsHandler;
 
 use crate::commands::{
     set_guidelines_channel_fn,
+    set_help_channel_fn,
+    add_help_category_fn,
+    HELP_BUTTON_CLICK_ID,
     set_help_log_answered_channel_fn,
     set_help_log_waiting_channel_fn
 };
 
 use crate::config::{Config, read_config};
+use crate::interactions::{
+    send_categories_fn,
+    send_channels_fn,
+    send_button_create_fn,
+    create_help_thread_fn,
+    HELP_SELECT_CATEGORY_ID,
+    HELP_SELECT_CHANNEL_ID,
+    HELP_CREATE_CLICK_ID,
+};
 use crate::token::read_token;
 
 mod token;
 mod config;
 mod command;
 mod commands;
+mod interactions;
 mod cache;
 
 #[tokio::main]
@@ -56,9 +69,11 @@ async fn main() {
         db.clone(),
         caches.clone(),
         )
+        .add_command("set_help_channel", set_help_channel_fn)
         .add_command("set_guidelines_channel", set_guidelines_channel_fn)
         .add_command("set_help_log_answered_channel", set_help_log_answered_channel_fn)
-        .add_command("set_help_log_waiting_channel", set_help_log_waiting_channel_fn);
+        .add_command("set_help_log_waiting_channel", set_help_log_waiting_channel_fn)
+        .add_command("add_help_category", add_help_category_fn);
 
     let mut client = Client::builder(token)
         .application_id(config.application_id)
@@ -107,5 +122,20 @@ impl EventHandler for Handler {
         }
     }
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        if let Interaction::ApplicationCommand(command) = interaction {
+            self.commands_handler.handle_response(&command, &ctx).await;
+        } else if let Interaction::MessageComponent(component) = interaction {
+            match component.data.custom_id.as_str() {
+                HELP_BUTTON_CLICK_ID => send_categories_fn(&component, &ctx, &self.db)
+                    .await,
+                HELP_SELECT_CATEGORY_ID => send_channels_fn(&component, &ctx)
+                    .await,
+                HELP_SELECT_CHANNEL_ID => send_button_create_fn(&component, &ctx, &self.caches)
+                    .await,
+                HELP_CREATE_CLICK_ID => create_help_thread_fn(&component, &ctx, &self.caches)
+                    .await,
+                _ => (),
+            }
+        }
     }
 }
