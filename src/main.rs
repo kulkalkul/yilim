@@ -14,6 +14,13 @@ use serenity::{
 };
 use sqlx::SqlitePool;
 use crate::cache::Caches;
+use crate::command::CommandsHandler;
+
+use crate::commands::{
+    set_guidelines_channel_fn,
+    set_help_log_answered_channel_fn,
+    set_help_log_waiting_channel_fn
+};
 
 use crate::config::{Config, read_config};
 use crate::token::read_token;
@@ -21,6 +28,7 @@ use crate::token::read_token;
 mod token;
 mod config;
 mod command;
+mod commands;
 mod cache;
 
 #[tokio::main]
@@ -43,6 +51,14 @@ async fn main() {
 
     let caches = Caches::new();
 
+    let commands_handler = CommandsHandler::new(
+        config.clone(),
+        db.clone(),
+        caches.clone(),
+        )
+        .add_command("set_guidelines_channel", set_guidelines_channel_fn)
+        .add_command("set_help_log_answered_channel", set_help_log_answered_channel_fn)
+        .add_command("set_help_log_waiting_channel", set_help_log_waiting_channel_fn);
 
     let mut client = Client::builder(token)
         .application_id(config.application_id)
@@ -50,6 +66,7 @@ async fn main() {
             db,
             caches,
             config,
+            commands_handler,
         })
         .await
         .expect("Error while creating client");
@@ -64,12 +81,30 @@ struct Handler {
     db: SqlitePool,
     caches: Caches,
     config: Arc<Config>,
+    commands_handler: CommandsHandler,
 }
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
+
+        for guild_status in ready.guilds {
+            let mut guild = guild_status.id();
+            let commands = guild
+                .set_application_commands(&ctx.http, |commands| {
+                    self.commands_handler.register_commands(commands);
+                    commands
+                })
+                .await
+                .unwrap_or_else(|e| {
+                    panic!("Error while registering commands for guild {}: {}", guild.0, e);
+                });
+
+            self.commands_handler
+                .register_permissions(&mut guild, &ctx.http, commands)
+                .await;
+        }
     }
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
     }
