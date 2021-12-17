@@ -6,6 +6,7 @@ const CONFIG_PATH: &'static str = "./config/config.toml";
 #[derive(Deserialize)]
 pub struct Config {
     pub application_id: u64,
+    pub db_path: String,
 }
 
 pub fn read_config() -> Config {
