@@ -22,6 +22,7 @@ use crate::commands::{
     add_help_category_fn,
     HELP_BUTTON_CLICK_ID,
     set_help_log_answered_channel_fn,
+    topic_fn,
     set_help_log_waiting_channel_fn
 };
 
@@ -73,7 +74,8 @@ async fn main() {
         .add_command("set_guidelines_channel", set_guidelines_channel_fn)
         .add_command("set_help_log_answered_channel", set_help_log_answered_channel_fn)
         .add_command("set_help_log_waiting_channel", set_help_log_waiting_channel_fn)
-        .add_command("add_help_category", add_help_category_fn);
+        .add_command("add_help_category", add_help_category_fn)
+        .add_command("topic", topic_fn);
 
     let mut client = Client::builder(token)
         .application_id(config.application_id)
