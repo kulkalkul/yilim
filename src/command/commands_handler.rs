@@ -14,6 +14,7 @@ use serenity::{
 use crate::Caches;
 use crate::command::command::CommandContext;
 use crate::command::option::Options;
+use crate::command::Template;
 use crate::config::Config;
 use super::command::{Command, Response, CommandHolder, ResponseFnHolder};
 
@@ -43,6 +44,17 @@ impl CommandsHandler {
         self.responses.insert(name, response);
 
         self
+    }
+    pub fn add_template_command<T, R>(
+        self,
+        name: T,
+        template_fn: impl FnOnce() -> R,
+    ) -> Self
+    where
+        T: ToString,
+        R: Template,
+    {
+        self.add_command(name, template_fn().build())
     }
     pub fn register_commands(&self, commands: &mut CreateApplicationCommands) {
         for command in self.registry.values() {
