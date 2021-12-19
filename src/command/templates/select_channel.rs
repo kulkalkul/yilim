@@ -7,16 +7,18 @@ use crate::Config;
 
 const CHANNEL_OPTION: &'static str = "channel";
 
-pub struct SetChannelTemplate {
+pub struct SelectChannelTemplate {
     pub channel_name: &'static str,
     pub channel_display_name: &'static str,
     pub uppercase_channel_display_name: String,
+    pub save_to_database: bool,
 }
 
-impl SetChannelTemplate {
+impl SelectChannelTemplate {
     pub fn new(
         channel_name: &'static str,
         channel_display_name: &'static str,
+        save_to_database: bool,
     ) -> Self {
         let uppercase_channel_display_name = {
             let mut chars = channel_display_name.chars();
@@ -30,17 +32,19 @@ impl SetChannelTemplate {
             channel_name,
             channel_display_name,
             uppercase_channel_display_name,
+            save_to_database,
         }
     }
 }
 
-impl Template for SetChannelTemplate {
+impl Template for SelectChannelTemplate {
     fn run(&self, mut command: Command) -> Command {
         let Config { administrator_id, .. } = *command.config;
 
-        let SetChannelTemplate {
+        let SelectChannelTemplate {
             channel_name,
             channel_display_name,
+            save_to_database,
             ..
         } = *self;
         let uppercase_channel_display_name = self.uppercase_channel_display_name.clone();
@@ -72,8 +76,10 @@ impl Template for SetChannelTemplate {
                         .await
                         .unwrap();
 
-                    insert_channel(&ctx.db, channel_name, channel.id.0 as i64)
-                        .await;
+                    if save_to_database {
+                        insert_channel(&ctx.db, channel_name, channel.id.0 as i64)
+                            .await;
+                    }
 
                     Response::message(move |message| {
                         message

@@ -1,3 +1,3 @@
-mod set_channel;
+mod select_channel;
 
-pub use set_channel::SetChannelTemplate;
+pub use select_channel::SelectChannelTemplate;
