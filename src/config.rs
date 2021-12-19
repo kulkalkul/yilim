@@ -8,6 +8,12 @@ pub struct Config {
     pub application_id: u64,
     pub administrator_id: u64,
     pub db_path: String,
+    pub role_ids: RoleIds,
+}
+
+#[derive(Deserialize)]
+pub struct RoleIds {
+    pub twitch: u64,
 }
 
 pub fn read_config() -> Config {

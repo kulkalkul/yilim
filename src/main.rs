@@ -16,15 +16,7 @@ use sqlx::SqlitePool;
 use crate::cache::Caches;
 use crate::command::CommandsHandler;
 
-use crate::commands::{
-    set_guidelines_channel_fn,
-    set_help_channel_fn,
-    add_help_category_fn,
-    HELP_BUTTON_CLICK_ID,
-    set_help_log_answered_channel_fn,
-    topic_fn,
-    set_help_log_waiting_channel_fn
-};
+use crate::commands::{set_guidelines_channel_fn, set_help_channel_fn, add_help_category_fn, HELP_BUTTON_CLICK_ID, set_help_log_answered_channel_fn, topic_fn, set_help_log_waiting_channel_fn, set_twitch_toggle_channel_fn};
 
 use crate::config::{Config, read_config};
 use crate::interactions::{
@@ -73,6 +65,7 @@ async fn main() {
         .add_template_command("set_guidelines_channel", set_guidelines_channel_fn)
         .add_template_command("set_help_log_answered_channel", set_help_log_answered_channel_fn)
         .add_template_command("set_help_log_waiting_channel", set_help_log_waiting_channel_fn)
+        .add_template_command("set_twitch_toggle_channel", set_twitch_toggle_channel_fn)
         .add_command("set_help_channel", set_help_channel_fn)
         .add_command("add_help_category", add_help_category_fn)
         .add_command("topic", topic_fn);

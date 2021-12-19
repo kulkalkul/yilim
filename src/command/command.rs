@@ -17,6 +17,7 @@ use crate::Caches;
 use crate::command::option::Options;
 use crate::config::Config;
 
+#[derive(Clone)]
 pub struct CommandContext {
     pub http: Arc<Http>,
     pub config: Arc<Config>,
@@ -32,8 +33,8 @@ pub struct CommandContext {
 pub struct Command {
     pub config: Arc<Config>,
     pub db: SqlitePool,
+    pub (super) response_fn: Option<Box<dyn Fn(CommandContext) -> BoxFuture<'static, Response> + Sync + Send>>,
     create_application_command: CreateApplicationCommand,
-    response_fn: Option<Box<dyn Fn(CommandContext) -> BoxFuture<'static, Response> + Sync + Send>>,
     permission_fn: Option<Box<dyn Fn(&mut CreateApplicationCommandPermissionsData) ->
         &mut CreateApplicationCommandPermissionsData + Sync + Send>>,
 }
@@ -83,7 +84,7 @@ impl Command {
     }
     pub fn set_response<Fut>(
         &mut self,
-        response_fn: impl Fn(CommandContext) -> Fut + Sync + Send + 'static
+        response_fn: impl Fn(CommandContext) -> Fut + Sync + Send + 'static,
     ) -> &mut Self
     where
         Fut: Future<Output = Response> + 'static + Send,

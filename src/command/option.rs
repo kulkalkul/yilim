@@ -7,6 +7,7 @@ use serenity::model::prelude::application_command::{
 };
 use serenity::model::prelude::{PartialChannel, Role, User};
 
+#[derive(Clone)]
 pub struct Options {
     options: HashMap<String, Option<ApplicationCommandInteractionDataOptionValue>>,
 }
