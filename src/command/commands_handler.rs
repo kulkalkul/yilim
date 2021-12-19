@@ -15,6 +15,7 @@ use crate::Caches;
 use crate::command::command::CommandContext;
 use crate::command::option::Options;
 use crate::command::Template;
+use crate::command::template::TemplateContext;
 use crate::config::Config;
 use super::command::{Command, Response, CommandHolder, ResponseFnHolder};
 
@@ -48,13 +49,21 @@ impl CommandsHandler {
     pub fn add_template_command<T, R>(
         self,
         name: T,
-        template_fn: impl FnOnce() -> R,
+        template_fn: impl FnOnce(TemplateContext) -> R,
     ) -> Self
     where
         T: ToString,
         R: Template,
     {
-        self.add_command(name, template_fn().build())
+        let context = TemplateContext {
+            config: self.config.clone(),
+            db: self.db.clone(),
+            caches: self.caches.clone(),
+        };
+
+        self
+            .add_command(name, template_fn(context)
+            .build())
     }
     pub fn register_commands(&self, commands: &mut CreateApplicationCommands) {
         for command in self.registry.values() {
