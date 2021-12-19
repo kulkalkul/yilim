@@ -6,9 +6,9 @@ use serenity::model::prelude::application_command::{
 use serenity::model::prelude::InteractionApplicationCommandCallbackDataFlags;
 use sqlx::SqlitePool;
 use crate::command::{Command, Response};
-use crate::commands::set_guidelines_channel::GUIDELINES_CHANNEL_ID;
-use crate::commands::set_help_log_answered_channel::HELP_LOG_ANSWERED_CHANNEL_ID;
-use crate::commands::set_help_log_waiting_channel::HELP_LOG_WAITING_CHANNEL_ID;
+use crate::commands::set_guidelines_channel::GUIDELINES_CHANNEL_NAME;
+use crate::commands::set_help_log_answered_channel::HELP_LOG_ANSWERED_CHANNEL_NAME;
+use crate::commands::set_help_log_waiting_channel::HELP_LOG_WAITING_CHANNEL_NAME;
 use crate::config::Config;
 
 pub const HELP_MESSAGE: &'static str = "help";
@@ -179,7 +179,7 @@ async fn read_guidelines_channel(db: &SqlitePool) -> Result<ChannelRecord, sqlx:
     sqlx::query_as!(
         ChannelRecord,
         "SELECT id FROM channels WHERE name = ?",
-        GUIDELINES_CHANNEL_ID,
+        GUIDELINES_CHANNEL_NAME,
     )
         .fetch_one(db)
         .await
@@ -189,7 +189,7 @@ async fn read_help_log_answered_channel(db: &SqlitePool) -> Result<ChannelRecord
     sqlx::query_as!(
         ChannelRecord,
         "SELECT id FROM channels WHERE name = ?",
-        HELP_LOG_ANSWERED_CHANNEL_ID,
+        HELP_LOG_ANSWERED_CHANNEL_NAME,
     )
         .fetch_one(db)
         .await
@@ -198,7 +198,7 @@ async fn read_help_log_waiting_channel(db: &SqlitePool) -> Result<ChannelRecord,
     sqlx::query_as!(
         ChannelRecord,
         "SELECT id FROM channels WHERE name = ?",
-        HELP_LOG_WAITING_CHANNEL_ID,
+        HELP_LOG_WAITING_CHANNEL_NAME,
     )
         .fetch_one(db)
         .await
