@@ -16,7 +16,16 @@ use sqlx::SqlitePool;
 use crate::cache::Caches;
 use crate::command::CommandsHandler;
 
-use crate::commands::{set_guidelines_channel_fn, set_help_channel_fn, add_help_category_fn, HELP_BUTTON_CLICK_ID, set_help_log_answered_channel_fn, topic_fn, set_help_log_waiting_channel_fn, set_twitch_toggle_channel_fn};
+use crate::commands::{
+    set_guidelines_channel_fn,
+    set_help_channel_fn,
+    add_help_category_fn,
+    HELP_BUTTON_CLICK_ID,
+    set_help_log_answered_channel_fn,
+    topic_fn,
+    set_help_log_waiting_channel_fn,
+    set_twitch_toggle_channel_fn
+};
 
 use crate::config::{Config, read_config};
 use crate::interactions::{
@@ -24,9 +33,11 @@ use crate::interactions::{
     send_channels_fn,
     send_button_create_fn,
     create_help_thread_fn,
+    twitch_toggle_role_fn,
     HELP_SELECT_CATEGORY_ID,
     HELP_SELECT_CHANNEL_ID,
     HELP_CREATE_CLICK_ID,
+    TWITCH_TOGGLE_CLICK_ID,
 };
 use crate::token::read_token;
 
@@ -128,6 +139,8 @@ impl EventHandler for Handler {
                 HELP_SELECT_CHANNEL_ID => send_button_create_fn(&component, &ctx, &self.caches)
                     .await,
                 HELP_CREATE_CLICK_ID => create_help_thread_fn(&component, &ctx, &self.caches)
+                    .await,
+                TWITCH_TOGGLE_CLICK_ID => twitch_toggle_role_fn(&component, &ctx, &self.config)
                     .await,
                 _ => (),
             }
